@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "id": "20260528230528",
+    "generated_at": "2026-05-28T23:05:28.0000000Z",
+    "note": "Security-only report (AppCAT was not run or failed)"
+  },
+  "rules": {},
+  "projects": [
+    {
+      "properties": {
+        "repo": "mnm-ZavaBatchScheduler",
+        "languages": [
+          "Java"
+        ],
+        "frameworks": [],
+        "tools": [
+          "Gradle"
+        ]
+      },
+      "incidents": []
+    }
+  ],
+  "security": []
+}
