@@ -1,0 +1,312 @@
+{
+  "metadata": {
+    "analysisStartTime": "2026-05-29T07:44:45.000Z",
+    "toolVersion": "appcat-6.x",
+    "targetRuntime": "openjdk25",
+    "targetComputeServices": [
+      "azure-appservice",
+      "azure-aks",
+      "azure-container-apps"
+    ],
+    "assessmentDomains": [
+      "java-upgrade",
+      "cloud-readiness",
+      "security"
+    ]
+  },
+  "rules": {
+    "java-version-upgrade": {
+      "ruleId": "java-version-upgrade",
+      "title": "Java version upgrade required (Java 8 \u2192 Java 25)",
+      "severity": "mandatory",
+      "effort": 5,
+      "description": "The application targets Java 8. To run on modern Azure compute services and benefit from long-term support, the application should be upgraded to Java 17 (LTS) or Java 21 (LTS). The project uses source/target compatibility 1.8 in build.gradle.",
+      "labels": [
+        "domain=java-upgrade"
+      ],
+      "links": [
+        "https://learn.microsoft.com/en-us/java/openjdk/transition-from-java-8-and-11"
+      ]
+    },
+    "rabbitmq-to-azure-service-bus": {
+      "ruleId": "rabbitmq-to-azure-service-bus",
+      "title": "RabbitMQ dependency \u2014 consider Azure Service Bus for cloud messaging",
+      "severity": "potential",
+      "effort": 8,
+      "description": "The application depends on com.rabbitmq:amqp-client:5.21.0. When migrating to Azure, consider replacing RabbitMQ with Azure Service Bus for managed, cloud-native message queuing without the need to maintain a broker.",
+      "labels": [
+        "domain=cloud-readiness"
+      ],
+      "links": [
+        "https://learn.microsoft.com/en-us/azure/service-bus-messaging/"
+      ]
+    },
+    "plaintext-db-credentials": {
+      "ruleId": "plaintext-db-credentials",
+      "title": "Plain-text database credentials in properties file",
+      "severity": "mandatory",
+      "effort": 3,
+      "description": "Database credentials (db.username, db.password) are stored in plaintext in batchscheduler.properties. In Azure, secrets must be stored in Azure Key Vault and injected at runtime via environment variables or managed identity.",
+      "labels": [
+        "domain=cloud-readiness"
+      ],
+      "links": [
+        "https://learn.microsoft.com/en-us/azure/key-vault/general/overview"
+      ]
+    },
+    "ssl-disabled-jdbc": {
+      "ruleId": "ssl-disabled-jdbc",
+      "title": "SQL Server JDBC connection has encryption disabled",
+      "severity": "mandatory",
+      "effort": 2,
+      "description": "The JDBC connection string sets 'encrypt=false;trustServerCertificate=true', which disables TLS encryption. Azure SQL Database requires encrypted connections. The connection string must be updated to use encrypted=true.",
+      "labels": [
+        "domain=cloud-readiness"
+      ],
+      "links": [
+        "https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-with-ssl-encryption"
+      ]
+    },
+    "low-level-http-client": {
+      "ruleId": "low-level-http-client",
+      "title": "Use of java.net.HttpURLConnection (low-level HTTP client)",
+      "severity": "optional",
+      "effort": 3,
+      "description": "The application uses the low-level java.net.HttpURLConnection API for HTTP calls. Consider replacing with a modern HTTP client such as java.net.http.HttpClient (Java 11+) or Apache HttpComponents to improve readability, resilience, and observability.",
+      "labels": [
+        "domain=java-upgrade"
+      ],
+      "links": [
+        "https://openjdk.org/groups/net/httpclient/intro.html"
+      ]
+    },
+    "docker-base-image-outdated": {
+      "ruleId": "docker-base-image-outdated",
+      "title": "Docker base image uses Java 8 (JRE 8) \u2014 update to supported JRE",
+      "severity": "mandatory",
+      "effort": 1,
+      "description": "The Dockerfile uses eclipse-temurin:8-jre as the runtime base image. Java 8 is EOL. Update to eclipse-temurin:21-jre or eclipse-temurin:25-jre for a supported and secure base image.",
+      "labels": [
+        "domain=java-upgrade"
+      ],
+      "links": [
+        "https://hub.docker.com/_/eclipse-temurin"
+      ]
+    },
+    "gradle-version-outdated": {
+      "ruleId": "gradle-version-outdated",
+      "title": "Gradle build image uses outdated version 7.6",
+      "severity": "potential",
+      "effort": 2,
+      "description": "The Dockerfile build stage uses gradle:7.6-jdk8. Gradle 7.6 is outdated; upgrade to Gradle 8.x with a supported JDK (17 or 21) for security patches and improved performance.",
+      "labels": [
+        "domain=java-upgrade"
+      ],
+      "links": [
+        "https://docs.gradle.org/current/release-notes.html"
+      ]
+    }
+  },
+  "projects": [
+    {
+      "id": "mnm-ZavaBatchScheduler",
+      "properties": {
+        "repo": "mnm-ZavaBatchScheduler",
+        "appName": "ZavaBatchScheduler",
+        "languages": [
+          "Java"
+        ],
+        "frameworks": [
+          "Java SE"
+        ],
+        "tools": [
+          "Gradle 7.6"
+        ],
+        "jdkVersion": "8",
+        "description": "Nightly batch scheduler for Zava Bank: orchestrates interest accrual, statement generation, and daily reconciliation by calling downstream services and logging results to Azure SQL.",
+        "applicationType": "Batch/Scheduler",
+        "tags": [
+          "batch",
+          "scheduler",
+          "rabbitmq",
+          "sql-server",
+          "java8"
+        ],
+        "linesOfCode": 230
+      },
+      "incidents": [
+        {
+          "ruleId": "java-version-upgrade",
+          "location": "build.gradle",
+          "line": 14,
+          "targets": {
+            "azure-aks": {
+              "effort": 5
+            },
+            "azure-appservice": {
+              "effort": 5
+            },
+            "azure-container-apps": {
+              "effort": 5
+            }
+          }
+        },
+        {
+          "ruleId": "rabbitmq-to-azure-service-bus",
+          "location": "build.gradle",
+          "line": 8,
+          "targets": {
+            "azure-aks": {
+              "effort": 8
+            },
+            "azure-appservice": {
+              "effort": 8
+            },
+            "azure-container-apps": {
+              "effort": 8
+            }
+          }
+        },
+        {
+          "ruleId": "plaintext-db-credentials",
+          "location": "src/main/resources/batchscheduler.properties",
+          "line": 18,
+          "targets": {
+            "azure-aks": {
+              "effort": 3
+            },
+            "azure-appservice": {
+              "effort": 3
+            },
+            "azure-container-apps": {
+              "effort": 3
+            }
+          }
+        },
+        {
+          "ruleId": "ssl-disabled-jdbc",
+          "location": "src/main/resources/batchscheduler.properties",
+          "line": 16,
+          "targets": {
+            "azure-aks": {
+              "effort": 2
+            },
+            "azure-appservice": {
+              "effort": 2
+            },
+            "azure-container-apps": {
+              "effort": 2
+            }
+          }
+        },
+        {
+          "ruleId": "low-level-http-client",
+          "location": "src/main/java/com/zavabank/batchscheduler/Main.java",
+          "line": 54,
+          "targets": {
+            "azure-aks": {
+              "effort": 3
+            },
+            "azure-appservice": {
+              "effort": 3
+            },
+            "azure-container-apps": {
+              "effort": 3
+            }
+          }
+        },
+        {
+          "ruleId": "docker-base-image-outdated",
+          "location": "Dockerfile",
+          "line": 6,
+          "targets": {
+            "azure-aks": {
+              "effort": 1
+            },
+            "azure-appservice": {
+              "effort": 1
+            },
+            "azure-container-apps": {
+              "effort": 1
+            }
+          }
+        },
+        {
+          "ruleId": "gradle-version-outdated",
+          "location": "Dockerfile",
+          "line": 1,
+          "targets": {
+            "azure-aks": {
+              "effort": 2
+            },
+            "azure-appservice": {
+              "effort": 2
+            },
+            "azure-container-apps": {
+              "effort": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "security": [
+    {
+      "id": "CWE-477",
+      "title": "Use of Obsolete Function",
+      "category": "Code Quality",
+      "severity": "optional",
+      "description": "The code uses deprecated or obsolete functions, which suggests that the code has not been actively reviewed or maintained.",
+      "evidence": {
+        "files": [
+          "src/main/java/com/zavabank/batchscheduler/Main.java"
+        ],
+        "explanation": "The codebase uses legacy java.util.Date (lines 55, 63, 114, 233) and java.text.SimpleDateFormat (line 233) \u2014 both of which have been superseded since Java 8 by the java.time.* API (LocalDateTime, ZonedDateTime, DateTimeFormatter). SimpleDateFormat is additionally not thread-safe, creating a latent risk if the instance were shared. The nowIso() method (line 233) instantiates a new SimpleDateFormat on every call, which is wasteful and relies on an obsolete formatter."
+      },
+      "storyPoint": 1
+    },
+    {
+      "id": "CWE-259",
+      "title": "Use of Hard-coded Password",
+      "category": "Credentials & Secrets",
+      "severity": "optional",
+      "description": "The product contains a hard-coded password, which it uses for its own inbound authentication or for outbound communication to external components.",
+      "evidence": {
+        "files": [
+          "src/main/resources/batchscheduler.properties"
+        ],
+        "explanation": "A plaintext SQL Server password is hardcoded at line 15 of batchscheduler.properties. This file is packaged into the fat-jar at build time, meaning anyone with access to the jar can extract the credential. Although an environment variable override (SQLSERVER_PASSWORD) is supported, the default value remains committed to the repository."
+      },
+      "storyPoint": 5
+    },
+    {
+      "id": "CWE-778",
+      "title": "Insufficient Logging",
+      "category": "Credentials & Secrets",
+      "severity": "potential",
+      "description": "When a security-critical event occurs, the product either does not record the event or omits important details about the event when logging it.",
+      "evidence": {
+        "files": [
+          "src/main/java/com/zavabank/batchscheduler/Main.java"
+        ],
+        "explanation": "The application uses raw System.out.println for all logging (log() method, line 238). Security-critical events such as database connection failures and HTTP service call failures are logged only as plain text messages with minimal context. There is no logging framework configured, making it impossible to route security-relevant events to a SIEM or centralized log aggregation system."
+      },
+      "storyPoint": 3
+    },
+    {
+      "id": "CWE-798",
+      "title": "Use of Hard-coded Credentials",
+      "category": "Credentials & Secrets",
+      "severity": "optional",
+      "description": "The product contains hard-coded credentials, such as a password or cryptographic key.",
+      "evidence": {
+        "files": [
+          "src/main/resources/batchscheduler.properties"
+        ],
+        "explanation": "Both the SQL Server username and password are hardcoded in batchscheduler.properties: db.username=sa (line 14) and db.password (line 15). The username sa is the SQL Server system administrator account, violating the principle of least privilege. Both credentials are committed to version control and embedded in the application jar."
+      },
+      "storyPoint": 5
+    }
+  ],
+  "rearchitect": []
+}

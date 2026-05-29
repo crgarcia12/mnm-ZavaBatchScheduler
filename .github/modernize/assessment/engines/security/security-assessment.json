@@ -1,0 +1,56 @@
+{
+  "GeneratedAt": "2026-05-29T07:44:45.0000000Z",
+  "ProjectPath": ".",
+  "Summary": {
+    "TotalFindings": 4,
+    "CveCount": 0,
+    "CweCount": 4,
+    "BySeverity": { "mandatory": 0, "optional": 3, "potential": 1 },
+    "ByCategory": { "Code Quality": 1, "Credentials & Secrets": 3 },
+    "TotalRulesAssessed": 59,
+    "RulesPassed": 55
+  },
+  "CveFindings": [],
+  "CweFindings": [
+    {
+      "Id": "CWE-477",
+      "Name": "Use of Obsolete Function",
+      "Category": "Code Quality",
+      "Severity": "optional",
+      "StoryPoint": 1,
+      "Description": "The code uses deprecated or obsolete functions, which suggests that the code has not been actively reviewed or maintained.",
+      "Files": ["src/main/java/com/zavabank/batchscheduler/Main.java"],
+      "Explanation": "The codebase uses legacy java.util.Date (lines 55, 63, 114, 233) and java.text.SimpleDateFormat (line 233) — both of which have been superseded since Java 8 by the java.time.* API (LocalDateTime, ZonedDateTime, DateTimeFormatter). SimpleDateFormat is additionally not thread-safe, creating a latent risk if the instance were shared. The nowIso() method (line 233) instantiates a new SimpleDateFormat on every call, which is wasteful and relies on an obsolete formatter."
+    },
+    {
+      "Id": "CWE-259",
+      "Name": "Use of Hard-coded Password",
+      "Category": "Credentials & Secrets",
+      "Severity": "optional",
+      "StoryPoint": 5,
+      "Description": "The product contains a hard-coded password, which it uses for its own inbound authentication or for outbound communication to external components.",
+      "Files": ["src/main/resources/batchscheduler.properties"],
+      "Explanation": "A plaintext SQL Server password is hardcoded at line 15 of batchscheduler.properties: 'db.******'. This file is packaged into the fat-jar at build time, meaning anyone with access to the jar can extract the credential. Although an environment variable override (SQLSERVER_PASSWORD) is supported, the default value remains committed to the repository."
+    },
+    {
+      "Id": "CWE-778",
+      "Name": "Insufficient Logging",
+      "Category": "Credentials & Secrets",
+      "Severity": "potential",
+      "StoryPoint": 3,
+      "Description": "When a security-critical event occurs, the product either does not record the event or omits important details about the event when logging it.",
+      "Files": ["src/main/java/com/zavabank/batchscheduler/Main.java"],
+      "Explanation": "The application uses raw System.out.println for all logging (log() method, line 238). Security-critical events such as database connection failures (insertBatchRunLog catch block, ~line 135) and HTTP service call failures (callService catch block, ~line 93) are logged only as plain text messages with minimal context — no timestamp correlation with the batch run ID, no severity level, no structured fields. There is no logging framework (SLF4J, Log4j, Logback) configured, making it impossible to route security-relevant events to a SIEM or centralized log aggregation system."
+    },
+    {
+      "Id": "CWE-798",
+      "Name": "Use of Hard-coded Credentials",
+      "Category": "Credentials & Secrets",
+      "Severity": "optional",
+      "StoryPoint": 5,
+      "Description": "The product contains hard-coded credentials, such as a password or cryptographic key.",
+      "Files": ["src/main/resources/batchscheduler.properties"],
+      "Explanation": "Both the SQL Server username and password are hardcoded in batchscheduler.properties: 'db.username=sa' (line 14) and 'db.******' (line 15). The username 'sa' is the SQL Server system administrator account — using this account for application connections violates the principle of least privilege. Both credentials are committed to version control and embedded in the application jar, exposing them to anyone with repository or artifact access."
+    }
+  ]
+}
