@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "analysisStartTime": "2026-05-29T03:50:32.0000000Z",
+    "analysisEndTime": "2026-05-29T03:50:32.0000000Z",
+    "sourceTechnology": "Java",
+    "targetDisplayNames": [
+      "Azure"
+    ],
+    "targetIds": [
+      "azure"
+    ]
+  },
+  "rules": {},
+  "projects": [
+    {
+      "properties": {
+        "repo": "mnm-ZavaBatchScheduler",
+        "appName": "ZavaBatchScheduler",
+        "languages": [
+          "Java"
+        ],
+        "frameworks": [
+          "Core Java"
+        ],
+        "tools": [
+          "Gradle"
+        ],
+        "jdkVersion": "8"
+      },
+      "incidents": []
+    }
+  ],
+  "security": [
+    {
+      "id": "CWE-259",
+      "title": "Use of Hard-coded Password",
+      "category": "Credentials & Secrets",
+      "severity": "optional",
+      "description": "The product contains a hard-coded password, which it uses for its own inbound authentication or for outbound communication to external components.",
+      "evidence": {
+        "files": [
+          "src/main/resources/batchscheduler.properties:15"
+        ],
+        "explanation": "A static database password value (`db.****** is defined in src/main/resources/batchscheduler.properties:15 and consumed for outbound SQL Server authentication in Main.insertBatchRunLog via config property lookup."
+      },
+      "storyPoint": 5
+    },
+    {
+      "id": "CWE-798",
+      "title": "Use of Hard-coded Credentials",
+      "category": "Credentials & Secrets",
+      "severity": "optional",
+      "description": "The product contains hard-coded credentials, such as a password or cryptographic key.",
+      "evidence": {
+        "files": [
+          "src/main/resources/batchscheduler.properties:14",
+          "src/main/resources/batchscheduler.properties:15"
+        ],
+        "explanation": "The configuration file stores static DB credentials (`db.username=sa`, `db.****** that are read at runtime for SQL Server connection setup."
+      },
+      "storyPoint": 5
+    }
+  ]
+}
