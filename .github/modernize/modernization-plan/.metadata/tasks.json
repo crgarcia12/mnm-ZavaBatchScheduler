@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "security",
+      "id": "001-security-cve-remediation",
+      "description": "Scan dependencies for CVEs and remediate vulnerabilities before Azure deployment.",
+      "reason": "Security remediation is required in every modernization plan to reduce production risk before migration.",
+      "requirements": "Upgrade vulnerable dependencies to minimum patched versions, document major-version upgrade risks, and verify build/test outcomes after remediation.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "deployment",
+      "id": "002-deployment-azure-container-apps",
+      "description": "Deploy the Java batch scheduler to Azure Container Apps.",
+      "reason": "The requested modernization goal is to migrate the current application to Azure.",
+      "requirements": "Prepare and deploy ZavaBatchScheduler to Azure Container Apps using existing or provisioned Azure resources and align runtime configuration for cloud execution.",
+      "dependencies": [
+        "001-security-cve-remediation"
+      ],
+      "skills": [
+        {
+          "name": "azcli-containerapp-deploy",
+          "location": "builtin"
+        }
+      ],
+      "targetAzureService": "Azure Container Apps",
+      "resourceStatus": "existing resource",
+      "deploymentTool": "bicep"
+    }
+  ],
+  "metadata": {
+    "planName": "modernization-plan",
+    "projectName": "ZavaBatchScheduler",
+    "language": "java",
+    "createdAt": "2026-05-29T00:41:16.168Z",
+    "version": "1.0"
+  }
+}
