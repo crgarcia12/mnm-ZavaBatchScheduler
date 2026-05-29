@@ -1,0 +1,47 @@
+{
+  "GeneratedAt": "2026-05-29T03:54:18.0000000Z",
+  "ProjectPath": ".",
+  "Summary": {
+    "TotalFindings": 2,
+    "CveCount": 0,
+    "CweCount": 2,
+    "BySeverity": {
+      "mandatory": 0,
+      "optional": 2,
+      "potential": 0
+    },
+    "ByCategory": {
+      "Credentials & Secrets": 2
+    },
+    "TotalRulesAssessed": 59,
+    "RulesPassed": 57
+  },
+  "CveFindings": [],
+  "CweFindings": [
+    {
+      "Id": "CWE-259",
+      "Name": "Use of Hard-coded Password",
+      "Category": "Credentials & Secrets",
+      "Severity": "optional",
+      "StoryPoint": 5,
+      "Description": "The product contains a hard-coded password, which it uses for its own inbound authentication or for outbound communication to external components.",
+      "Files": [
+        "src/main/resources/batchscheduler.properties:15"
+      ],
+      "Explanation": "A static database password value (`db.****** is defined in src/main/resources/batchscheduler.properties:15 and consumed for outbound SQL Server authentication in Main.insertBatchRunLog via config property lookup."
+    },
+    {
+      "Id": "CWE-798",
+      "Name": "Use of Hard-coded Credentials",
+      "Category": "Credentials & Secrets",
+      "Severity": "optional",
+      "StoryPoint": 5,
+      "Description": "The product contains hard-coded credentials, such as a password or cryptographic key.",
+      "Files": [
+        "src/main/resources/batchscheduler.properties:14",
+        "src/main/resources/batchscheduler.properties:15"
+      ],
+      "Explanation": "The configuration file stores static DB credentials (`db.username=sa`, `db.****** that are read at runtime for SQL Server connection setup."
+    }
+  ]
+}
