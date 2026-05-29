@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "upgrade",
+      "id": "001-upgrade-java-runtime-framework",
+      "description": "Upgrade the application to the latest supported Java runtime and framework baseline for Azure modernization.",
+      "reason": "The project currently targets Java 8 and requires runtime modernization before cloud-native migrations.",
+      "requirements": "Upgrade project runtime and framework baseline to the latest compatible version, including build configuration updates needed for Azure-ready modernization.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "002-transform-azure-sql-managed-identity",
+      "description": "Modernize database connectivity to Azure SQL with cloud-native authentication.",
+      "reason": "Current SQL connectivity relies on direct credentials; cloud-native Azure deployment should use managed identity.",
+      "requirements": "Migrate SQL Server connectivity to Azure SQL and use managed identity based authentication for data access in the scheduler workflow.",
+      "dependencies": [
+        "001-upgrade-java-runtime-framework"
+      ],
+      "skills": [
+        {
+          "name": "migration-mi-azure-sql",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "003-transform-secrets-to-key-vault",
+      "description": "Move application credentials and secrets to Azure Key Vault.",
+      "reason": "The application currently uses environment/plaintext database credentials and should adopt centralized secret management.",
+      "requirements": "Replace plaintext/environment credential usage with Azure Key Vault backed secret retrieval for all scheduler database and service secrets.",
+      "dependencies": [
+        "001-upgrade-java-runtime-framework"
+      ],
+      "skills": [
+        {
+          "name": "migration-plaintext-credential-to-azure-keyvault",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "004-security-cve-remediation",
+      "description": "Scan dependencies for CVEs and remediate vulnerabilities before Azure deployment.",
+      "reason": "Security remediation is required for every modernization plan to reduce known dependency risk.",
+      "requirements": "Scan all project dependencies for known CVEs and upgrade vulnerable dependencies to minimum patched versions; document major-version remediation risks and verify project build and tests after remediation.",
+      "dependencies": [
+        "001-upgrade-java-runtime-framework",
+        "002-transform-azure-sql-managed-identity",
+        "003-transform-secrets-to-key-vault"
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "deployment",
+      "id": "005-deployment-azure-container-apps",
+      "description": "Deploy the modernized ZavaBatchScheduler application to Azure.",
+      "reason": "The user explicitly requested Azure deployment of the modernized application.",
+      "requirements": "Containerize as needed and deploy the application to Azure Container Apps using existing or provisioned Azure resources with managed identity based authentication.",
+      "dependencies": [
+        "004-security-cve-remediation"
+      ],
+      "skills": [
+        {
+          "name": "azcli-containerapp-deploy",
+          "location": "builtin"
+        }
+      ],
+      "targetAzureService": "Azure Container Apps",
+      "resourceStatus": "create new service",
+      "deploymentTool": "bicep"
+    }
+  ],
+  "metadata": {
+    "planName": "plan",
+    "projectName": "ZavaBatchScheduler",
+    "language": "java",
+    "createdAt": "2026-05-29T08:22:05Z",
+    "version": "1.0"
+  }
+}
